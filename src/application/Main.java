@@ -1,7 +1,9 @@
 package application;
 
 import model.entities.Reservation;
+import model.exceptions.DomainException;
 
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -14,18 +16,16 @@ public class Main {
 
         Reservation reservation = null;
 
-        System.out.print("Room Number: ");
-        int roomNumber = input.nextInt();
+        try {
+            System.out.print("Room Number: ");
+            int roomNumber = input.nextInt();
 
-        System.out.print("Check-in date (dd/MM/yyyy): ");
-        LocalDate checkin = LocalDate.parse(input.next(), fmt());
+            System.out.print("Check-in date (dd/MM/yyyy): ");
+            LocalDate checkin = LocalDate.parse(input.next(), fmt());
 
-        System.out.print("Check-out date (dd/MM/yyyy): ");
-        LocalDate checkout = LocalDate.parse(input.next(), fmt());
+            System.out.print("Check-out date (dd/MM/yyyy): ");
+            LocalDate checkout = LocalDate.parse(input.next(), fmt());
 
-        if (!checkout.isAfter(checkin)) {
-            System.out.println("Error in a reservation: check-out date must be after check-in date");
-        } else {
             reservation = new Reservation(roomNumber, checkin, checkout);
             System.out.println("Reservation: " + reservation);
 
@@ -37,13 +37,14 @@ public class Main {
             System.out.print("Check-out date (dd/MM/yyyy): ");
             checkout = LocalDate.parse(input.next(), fmt());
 
-            String error = reservation.updatesDates(checkin, checkout);
-            if (error != null) {
-                System.out.println("Error in a reservation: " + error);
-            } else {
-                System.out.println("Reservation: " + reservation);
-            }
+            reservation.updatesDates(checkin, checkout);
+            System.out.println("Reservation: " + reservation);
+        } catch (DomainException e) {
+            System.out.println("Error in a reservation: " + e.getMessage());
+        } catch (RuntimeException e) {
+            System.out.println("Unexpected error");
         }
+        input.close();
     }
 
     private static DateTimeFormatter fmt() {
